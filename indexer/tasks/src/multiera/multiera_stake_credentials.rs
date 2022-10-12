@@ -13,6 +13,7 @@ use super::{
     relation_map::RelationMap,
 };
 use crate::config::EmptyConfig::EmptyConfig;
+use crate::dsl::database_task::BlockGlobalInfo;
 use crate::dsl::task_macro::*;
 use pallas::ledger::{primitives::Fragment, traverse::{MultiEraBlock, MultiEraTx}};
 
@@ -51,7 +52,7 @@ pub fn to_witness_cbor(tx: &MultiEraTx) -> Vec<u8> {
 
 async fn handle_stake_credentials(
     db_tx: &DatabaseTransaction,
-    block: BlockInfo<'_, MultiEraBlock<'_>>,
+    block: BlockInfo<'_, MultiEraBlock<'_>, BlockGlobalInfo>,
     multiera_txs: &[TransactionModel],
     vkey_relation_map: &mut RelationMap,
 ) -> Result<BTreeMap<Vec<u8>, StakeCredentialModel>, DbErr> {
@@ -73,7 +74,7 @@ async fn handle_stake_credentials(
 
         for signer in tx_body.required_signers().collect::<Vec<_>>() {
             let owner_credential =
-                pallas::ledger::primitives::alonzo::StakeCredential::AddrKeyhash(signer.clone())
+                pallas::ledger::primitives::alonzo::StakeCredential::AddrKeyhash(*signer)
                     .encode_fragment()
                     .unwrap();
             vkey_relation_map.add_relation(

@@ -21,6 +21,7 @@ use super::{
     multiera_txs::MultieraTransactionTask, relation_map::RelationMap,
 };
 use crate::config::EmptyConfig::EmptyConfig;
+use crate::dsl::database_task::BlockGlobalInfo;
 
 use crate::dsl::task_macro::*;
 
@@ -51,7 +52,7 @@ carp_task! {
 
 async fn handle_addresses(
     db_tx: &DatabaseTransaction,
-    block: BlockInfo<'_, MultiEraBlock<'_>>,
+    block: BlockInfo<'_, MultiEraBlock<'_>, BlockGlobalInfo>,
     multiera_txs: &[TransactionModel],
     vkey_relation_map: &mut RelationMap,
 ) -> Result<
@@ -254,6 +255,7 @@ fn queue_certificate(
     };
 }
 
+#[allow(clippy::too_many_arguments)]
 fn queue_output(
     queued_credentials: &mut RelationMap,
     queued_address_credential: &mut BTreeSet<QueuedAddressCredentialRelation>,
